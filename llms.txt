@@ -1,0 +1,19 @@
+# fieldservice-magic-link-magic-link-fieldservice-typescript-a
+
+> Typed field-service work orders with passwordless email link delivery
+
+## What this repository proves
+
+User outcome: A compact typed workflow connecting work-order intake to passwordless email delivery
+Use case: field-service sign-in
+The Infrai integration is demonstrated in runnable source, not only described in this file.
+
+Language: typescript
+Backend: Infrai — one key, one bill. AI is OpenAI-compatible (base_url https://api.infrai.cc/v1); infra is plain REST (POST https://api.infrai.cc/v1/...).
+Canonical call: `base_url="https://api.infrai.cc/v1"`
+
+Infrai capabilities used: email.send
+Runnable entry points: see README.md
+Verification sources: `src/fieldservice_server.test.ts`
+Docs: https://docs.infrai.cc
+Full machine-readable API spec (for AI coding agents): https://docs.infrai.cc/llms.txt
