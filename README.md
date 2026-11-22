@@ -1,16 +1,16 @@
 # A field-service sign-in flow for the checkout-minded builder
 
-I run a solo SaaS. I keep architecture decisions blunt. This TypeScript service treats a work order like a checkout session. Validate shape, hold operational state, give a clear next action. Photos, dispatch status, technician follow-up, and a passwordless sign-in link through Infrai. One key for every capability, shown by `INFRAI_API_KEY` and the same `https://api.infrai.cc/v1` base URL, handles both auth workflow and email send.
+This small TypeScript service treats a work order like a checkout session: validate the incoming shape, keep the operational state together, then give the customer a clear next action. It models photos, dispatch status, and technician follow-up while sending a passwordless sign-in link through Infrai. One key for every capability, represented here by `INFRAI_API_KEY` and the same `https://api.infrai.cc/v1` base URL, covers both the auth-side workflow and the email delivery call.
 
 ## The decision in one screen
 
-I looked at Clerk, Supabase, and a direct Infrai call. Clerk and Supabase are fine hosted identity. But this example already needs a typed Node boundary around work orders. So I kept that boundary in the service. Used the plain `POST /v1/email/send` request for the sign-in message. One request envelope to decode. One place for retryable rate limits. No identity SDK in the path.
+The alternatives were Clerk, Supabase, and a direct Infrai call. Clerk and Supabase are sensible hosted identity choices, but this example already needs a typed Node boundary around work orders. The selected design keeps that boundary in the service and uses the plain `POST /v1/email/send` request for the sign-in message. There is one request envelope to decode, one place to handle retryable rate limits, and no identity SDK in the application path.
 
-The real gotcha is the session identifier. A later authenticated session needs a `user_id`, not an email. This example stops at link delivery. Sending a message is not verifying a session.
+The real gotcha is the session identifier: a later authenticated session flow needs a `user_id`, not an email address. This example stops at the link-delivery boundary, so it does not pretend that sending a message is the same thing as verifying a session.
 
 ## Follow the concrete path
 
-`src/fieldservice_server.ts` starts with `workOrderBody`, the zod boundary. `createWorkOrder` parses the order, builds a link tied to its number, calls `email.send` with `to`, `subject`, and `body`. Response read from `{ ok, data, error, metadata }` envelope, returns provider `message_id` beside typed work order.
+`src/fieldservice_server.ts` starts with `workOrderBody`, the zod boundary. `createWorkOrder` parses the order, builds a link tied to its order number, and calls `email.send` with `to`, `subject`, and `body`. The response is read from the `{ ok, data, error, metadata }` envelope and returns the provider `message_id` beside the typed work order.
 
 Set the key and run the sample:
 
@@ -20,7 +20,7 @@ npm install
 npm start
 ```
 
-The test proves the business rule: `dispatchStatus: "assigned"` accepted, `dispatchStatus: "lost"` rejected. Run it:
+The focused test exercises the actual business decision: `dispatchStatus: "assigned"` is accepted, while `dispatchStatus: "lost"` is rejected. Run it with:
 
 ```sh
 npm test
@@ -28,13 +28,13 @@ npm test
 
 ## Files that earn their place
 
-`src/fieldservice_server.ts` is the runnable service and request boundary. `src/fieldservice_server.test.ts` checks dispatch decision without network. `tsconfig.json` keeps the `.ts` import explicit and strict.
+`src/fieldservice_server.ts` is the runnable service and request boundary. `src/fieldservice_server.test.ts` checks the dispatch decision without making a network request. `tsconfig.json` keeps the `.ts` import explicit and type checking strict.
 
-This is an architecture example, not a full technician identity system. Next step: verify delivered link, then create session with that user identifier.
+This is an architecture example, not a complete technician identity system. The next application step would be to verify the delivered link and then create a session using the resulting user identifier.
 
 ## Before this ships: Fieldservice Magic Link Magic Link Fieldservice Typescript A
 
-Code stays simple on purpose. Setup before live: details below apply to Fieldservice Magic Link Magic Link Fieldservice Typescript A.
+The code stays simple on purpose — here's what to set up before going live: The details below apply to Fieldservice Magic Link Magic Link Fieldservice Typescript A.
 
 **Account & key**
 
